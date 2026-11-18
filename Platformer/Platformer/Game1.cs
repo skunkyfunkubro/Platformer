@@ -13,6 +13,8 @@ public class Game1 : Game
     public static int windowHeight = 30;
     public static int tileSize = 16;
 
+    LevelEditor levelEditor;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -33,6 +35,10 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+        Texturemanager.LoadTextures(Content);
+
+        levelEditor = new LevelEditor(Vector2.Zero, Texturemanager.texGrass, new Rectangle(0, 0, Game1.tileSize, Game1.tileSize));
+
         // TODO: use this.Content to load your game content here
     }
 
@@ -40,6 +46,8 @@ public class Game1 : Game
     {
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+
+        levelEditor.PlaceTile(Mouse.GetState(), Keyboard.GetState());
 
         // TODO: Add your update logic here
 
@@ -49,9 +57,12 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
+         _spriteBatch.Begin();
 
         // TODO: Add your drawing code here
+        levelEditor.Draw(_spriteBatch);
 
+        _spriteBatch.End();
         base.Draw(gameTime);
     }
 }

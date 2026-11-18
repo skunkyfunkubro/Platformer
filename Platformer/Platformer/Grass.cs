@@ -14,6 +14,6 @@ public class Grass : Tile
 {
     public Grass(Vector2 pos, Texture2D tex, Rectangle rec) : base(pos, tex, rec)
     {
-        tex = Texturemanager.texGrass;
+
     }
 }

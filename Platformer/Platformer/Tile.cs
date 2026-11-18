@@ -7,11 +7,11 @@ namespace Platformer;
 
 public abstract class Tile
 {
-    Vector2 pos;
-    Texture2D tex;
-    Rectangle rec;
+    public Vector2 pos;
+    protected Texture2D tex;
+    public Rectangle rec;
 
-    List<Tile> tileList;
+   // List<Tile> tileList;
 
     public Tile(Vector2 pos, Texture2D tex, Rectangle rec)
     {

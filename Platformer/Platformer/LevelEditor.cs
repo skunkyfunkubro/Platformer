@@ -13,10 +13,16 @@ namespace Platformer;
 
 public class LevelEditor
 {
-    Tile[,] grid = new Tile[Game1.windowWidth, Game1.windowHeight];
+    //Tile[,] grid = new Tile[Game1.windowWidth, Game1.windowHeight];
     Vector2 pos;
     Texture2D tex;
     Rectangle rec;
+    List<Tile> tileList = new();
+
+    private string tileType;
+    private MouseState previousMouseState;
+    private MouseState currentMouseState;
+    private KeyboardState previousKeyboardState;
 
     public LevelEditor(Vector2 pos, Texture2D tex, Rectangle rec)
     {
@@ -25,44 +31,164 @@ public class LevelEditor
         this.rec = rec;
     }
 
-    public void ChooseTile() //lägg case switch för att kolla vilken tile jag väljer med ha en bool is placing tile
+    public Vector2 MousePosition(MouseState mouse)
     {
-        //rec och pos = mus positionen 
+        int x = mouse.X / Game1.tileSize * Game1.tileSize;
+        int y = mouse.Y / Game1.tileSize * Game1.tileSize;
+
+        return new Vector2(x, y);
     }
-
-    public void PlaceTile() // om placing är sann sätt funktion för att placera tilen i rätt index
+    
+    public void SelectTile(KeyboardState keyboard)
     {
-        
-    }
-
-    public void SaveFile(List<Tile> tileList) //måste placera in alla tiles i arrayen i json skappa en ny objekt i json som key. save i en edited level json fil
-    {
-      JArray tileArray = new JArray();
-      JObject findObject = new JObject();
-
-      for(int i = 0; i < tileList.Count; i++)
+        if (keyboard.IsKeyDown(Keys.Space) && !previousKeyboardState.IsKeyDown(Keys.D1))
         {
-            JObject obj //lägg in if sats där de kollar index och om index = med någonting lägg 
+            tileType = "Grass";
+        }
+    }
+    
+    public Tile ChooseTilePos(Vector2 position) 
+    {
+        foreach (Tile tile in tileList)
+        {
+            if(tile.pos == position)
+            {
+                return tile;
+            }
         }
 
-        //lägg till arraysen i findobject
-
-        //file.writealltext()
-        //skappa arrayer som t.ex grassarray som man fyller jobjects i
+        return null;
     }
 
-    public JObject CreateObject(Rectangle rec) // här lägger jag in tilesen
+    public void PlaceTile(MouseState mouse, KeyboardState keyboard) 
     {
-       positionX = (int)pos.X;
-       positionY = (int)pos.Y;
-       Height = 16;
-       Width = 16;
-    }
-
-    public void RemoveTile()
-    {
+        //gör case switch sen
+        SelectTile(keyboard);
         
+        if(mouse.LeftButton == ButtonState.Pressed && previousMouseState.LeftButton == ButtonState.Released)
+        {
+            Vector2 position = MousePosition(mouse);
+
+            if(tileType == "Grass")
+            {
+                tileList.Add(new Grass(
+                    position,
+                    Texturemanager.texGrass,
+                    new Rectangle(0, 0, Game1.tileSize, Game1.tileSize)
+                ));
+            }
+        }
+
+        if (mouse.RightButton == ButtonState.Pressed && previousMouseState.RightButton == ButtonState.Released)
+        {
+            RemoveTile(MousePosition(mouse));
+        }
+
+        previousKeyboardState = keyboard;
+        previousMouseState = mouse;
     }
+
+    // public void SaveFile(List<Tile> tileList) //måste placera in alla tiles i arrayen i json skappa en ny objekt i json som key. save i en edited level json fil
+    // {
+    //   JArray tileArray = new JArray();
+    //   JObject findObject = new JObject();
+    //   JArray grassArray = new JArray();
+
+    //   for(int i = 0; i < tileList.Count; i++)
+    //     {
+    //         JObject obj; //lägg in if sats där de kollar index och om index = med någonting lägg. lägg in case switch som kollar vilken typ de är sen sett in i array
+    //         switch tile
+
+    //             case(tileList[i] is grasstile):
+    //             grassArray.Add({"positionX": tileList[i].pos.X, "positionY": tileList[i].pos.Y, "height": Game1.tileSize, "width": Game1.tileSize})
+                
+    //             //case()
+
+
+            
+    //     }
+    //     findObject.Add("grassTile", grassArray) // gör såhär för alla tiles
+
+
+    //     //lägg till arraysen i findobject
+    //     //när jag läggger in behöver jag pos som kommer ifrån mus funktionen
+
+    //     //file.writealltext()
+    //     //skappa arrayer som t.ex grassarray som man fyller jobjects i
+
+    //     findObject.Add("GrassTiles", grassArray);
+    
+    //}
+
+    public void SaveFile(string fileName)
+    {
+        JArray grassArray = new JArray();
+
+        foreach (Tile tile in tileList)
+        {
+            if (tile is Grass)
+            {
+                JObject grassObject = new JObject
+                {
+                    ["positionX"] = (int)tile.pos.X,
+                    ["positionY"] = (int)tile.pos.Y,
+                    ["height"] = Game1.tileSize,
+                    ["width"] = Game1.tileSize
+                };
+
+                grassArray.Add(grassObject);
+            }
+        }
+
+        JObject levelObject = new JObject
+        {
+            ["GrassTiles"] = grassArray
+        };
+
+        File.WriteAllText(fileName, levelObject.ToString());
+    }
+
+    public void RemoveTile(Vector2 position)
+    {
+        //remove den index ifrån arrayen
+        for(int i = tileList.Count - 1; i >= 0; i--)
+        {
+            if(tileList[i].pos == position)
+            {
+                tileList.RemoveAt(i);
+                return;
+            }
+        }
+    }
+
+    public void LoadFile(string fileName)
+    {
+        tileList.Clear();
+
+        List<Rectangle> rectangles = JsonParser.GetRectangleList(fileName, "GrassTiles"); //lägg in de andra tilesen
+
+        foreach (Rectangle rectangle in rectangles)
+        {
+            tileList.Add(new Grass(
+            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texGrass, rectangle));
+        }
+    }
+
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        foreach(Tile tile in tileList)
+        {
+            tile.Draw(spriteBatch);
+        }
+    }
+
+    /*
+        gör en draw
+        foreach(grassArray in TileList)
+        {
+        spritebatch.Draw(pos, tex, Color.White)
+        }
+    */
 }
   
   

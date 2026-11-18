@@ -48,6 +48,8 @@ public class JsonParser
         return recList;
     }
 
+    
+
     public static Rectangle GetRectangle(string fileName, string propertyName)
     {
         if(wholeObject == null || currentFileName == null || currentFileName != fileName)

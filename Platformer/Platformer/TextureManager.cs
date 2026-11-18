@@ -21,9 +21,9 @@ public static class Texturemanager
     
     public static void LoadTextures(ContentManager content)
     {
-        spriteSheetPlayerDesappearing = content.Load<Texture2D>("Desapearing (96x96)");
+        spriteSheetPlayerDesappearing = content.Load<Texture2D>("Desappearing (96x96)");
         spriteSheetDoubleJump = content.Load<Texture2D>("Double Jump (32x32)");
-        spriteSheetFalling = content.Load<Texture2D>("Fall 32x32");
+        //spriteSheetFalling = content.Load<Texture2D>("Fall 32x32");
         spriteSheetPlayerHit = content.Load<Texture2D>("Hit (32x32)");
         spriteSheetPlayerIdle = content.Load<Texture2D>("Idle (32x32)");
         spriteSheetJump = content.Load<Texture2D>("Jump (32x32)");
