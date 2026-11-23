@@ -41,9 +41,19 @@ public class LevelEditor
     
     public void SelectTile(KeyboardState keyboard)
     {
-        if (keyboard.IsKeyDown(Keys.Space) && !previousKeyboardState.IsKeyDown(Keys.D1))
+        if (keyboard.IsKeyDown(Keys.D1) && !previousKeyboardState.IsKeyDown(Keys.D1))
         {
             tileType = "Grass";
+        }
+
+        if (keyboard.IsKeyDown(Keys.D2) && !previousKeyboardState.IsKeyDown(Keys.D2))
+        {
+            tileType = "Wall";
+        }
+
+        if (keyboard.IsKeyDown(Keys.D3) && !previousKeyboardState.IsKeyDown(Keys.D3))
+        {
+            tileType = "Ground";
         }
     }
     
@@ -74,6 +84,24 @@ public class LevelEditor
                 tileList.Add(new Grass(
                     position,
                     Texturemanager.texGrass,
+                    new Rectangle(0, 0, Game1.tileSize, Game1.tileSize)
+                ));
+            }
+
+            if(tileType == "Wall")
+            {
+                tileList.Add(new Wall(
+                    position,
+                    Texturemanager.texWall,
+                    new Rectangle(0, 0, Game1.tileSize, Game1.tileSize)
+                ));
+            }
+
+            if(tileType == "Ground")
+            {
+                tileList.Add(new Ground(
+                    position,
+                    Texturemanager.texGround,
                     new Rectangle(0, 0, Game1.tileSize, Game1.tileSize)
                 ));
             }
@@ -123,10 +151,12 @@ public class LevelEditor
     public void SaveFile(string fileName)
     {
         JArray grassArray = new JArray();
+        JArray wallArray = new JArray();
+        JArray groundArray = new JArray();
 
         foreach (Tile tile in tileList)
         {
-            if (tile is Grass)
+            if(tile is Grass)
             {
                 JObject grassObject = new JObject
                 {
@@ -138,12 +168,43 @@ public class LevelEditor
 
                 grassArray.Add(grassObject);
             }
+
+            if(tile is Wall)
+            {
+                JObject wallObject = new JObject
+                {
+                    ["positionX"] = (int)tile.pos.X,
+                    ["positionY"] = (int)tile.pos.Y,
+                    ["height"] = Game1.tileSize,
+                    ["width"] = Game1.tileSize
+                };
+
+                wallArray.Add(wallObject);
+            }
+
+            if(tile is Ground)
+            {
+                JObject groundObject = new JObject
+                {
+                    ["positionX"] = (int)tile.pos.X,
+                    ["positionY"] = (int)tile.pos.Y,
+                    ["height"] = Game1.tileSize,
+                    ["width"] = Game1.tileSize
+                };
+
+                groundArray.Add(groundObject);
+            }
+
         }
 
         JObject levelObject = new JObject
         {
             ["GrassTiles"] = grassArray
+            ["WallTiles"] = wallArray
+            ["GroundTiles"] = groundArray
         };
+
+        
 
         File.WriteAllText(fileName, levelObject.ToString());
     }
@@ -171,6 +232,12 @@ public class LevelEditor
         {
             tileList.Add(new Grass(
             new Vector2(rectangle.X, rectangle.Y), Texturemanager.texGrass, rectangle));
+
+            tileList.Add(new Wall(
+            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texWall, rectangle));
+
+            tileList.Add(new Ground(
+            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texGround, rectangle));
         }
     }
 
@@ -181,14 +248,6 @@ public class LevelEditor
             tile.Draw(spriteBatch);
         }
     }
-
-    /*
-        gör en draw
-        foreach(grassArray in TileList)
-        {
-        spritebatch.Draw(pos, tex, Color.White)
-        }
-    */
 }
   
   

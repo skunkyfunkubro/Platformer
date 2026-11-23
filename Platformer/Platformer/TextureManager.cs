@@ -17,6 +17,8 @@ public static class Texturemanager
     public static Texture2D spriteSheetWallJump;
     public static Texture2D spriteSheetTiles;
     public static Texture2D texGrass;
+    public static Texture2D texWall;
+    public static Texture2D texGround;
     
     
     public static void LoadTextures(ContentManager content)
@@ -28,5 +30,7 @@ public static class Texturemanager
         spriteSheetPlayerIdle = content.Load<Texture2D>("Idle (32x32)");
         spriteSheetJump = content.Load<Texture2D>("Jump (32x32)");
         texGrass = content.Load<Texture2D>("grass");
+        texWall = content.Load<Texture2D>("wall");
+        texGround = content.Load<Texture2D>("ground");
     }
 }
