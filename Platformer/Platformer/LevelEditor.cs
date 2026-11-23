@@ -65,7 +65,7 @@ public class LevelEditor
 
         if (keyboard.IsKeyDown(Keys.D4) && !previousKeyboardState.IsKeyDown(Keys.D4))
         {
-            gameObjectType = "Player";
+            tileType = "Player";
         }
     }
     
@@ -129,7 +129,7 @@ public class LevelEditor
                 ));
             }
 
-            if(gameObjectType == "Player")
+            if(tileType == "Player")
             {
                 player = new Player(position, Texturemanager.spriteSheetPlayerIdle, new Rectangle(0, 0, Game1.tileSize * 2, Game1.tileSize * 2));
             }
@@ -268,7 +268,7 @@ public class LevelEditor
 
         foreach (Rectangle rectangle in JsonParser.GetRectangleList(fileName, "Player"))
         {
-            new Player(
+            player = new Player(
                 new Vector2(rectangle.X, rectangle.Y),
                 Texturemanager.spriteSheetPlayerIdle,
                 rectangle);
