@@ -30,6 +30,4 @@ public class Player : GameObjects
         
     }
 
-
-
 }

@@ -18,11 +18,16 @@ public class LevelEditor
     Texture2D tex;
     Rectangle rec;
     List<Tile> tileList = new();
+    
+    Player player;
 
     private string tileType;
+    private string gameObjectType;
     private MouseState previousMouseState;
     private MouseState currentMouseState;
     private KeyboardState previousKeyboardState;
+    private bool playerIsPlaced = false;
+    
 
     public LevelEditor(Vector2 pos, Texture2D tex, Rectangle rec)
     {
@@ -30,6 +35,8 @@ public class LevelEditor
         this.tex = tex;
         this.rec = rec;
     }
+
+  
 
     public Vector2 MousePosition(MouseState mouse)
     {
@@ -55,6 +62,11 @@ public class LevelEditor
         {
             tileType = "Ground";
         }
+
+        if (keyboard.IsKeyDown(Keys.D4) && !previousKeyboardState.IsKeyDown(Keys.D4))
+        {
+            gameObjectType = "Player";
+        }
     }
     
     public Tile ChooseTilePos(Vector2 position) 
@@ -67,6 +79,17 @@ public class LevelEditor
             }
         }
 
+        return null;
+    }
+
+    public Player ChoosePlayerPos(Vector2 position) 
+    {
+        
+        if(player.pos == position)
+        {
+            return player;
+        }
+        
         return null;
     }
 
@@ -105,6 +128,11 @@ public class LevelEditor
                     new Rectangle(0, 0, Game1.tileSize, Game1.tileSize)
                 ));
             }
+
+            if(gameObjectType == "Player")
+            {
+                player = new Player(position, Texturemanager.spriteSheetPlayerIdle, new Rectangle(0, 0, Game1.tileSize * 2, Game1.tileSize * 2));
+            }
         }
 
         if (mouse.RightButton == ButtonState.Pressed && previousMouseState.RightButton == ButtonState.Released)
@@ -112,47 +140,19 @@ public class LevelEditor
             RemoveTile(MousePosition(mouse));
         }
 
+
         previousKeyboardState = keyboard;
         previousMouseState = mouse;
     }
 
-    // public void SaveFile(List<Tile> tileList) //måste placera in alla tiles i arrayen i json skappa en ny objekt i json som key. save i en edited level json fil
-    // {
-    //   JArray tileArray = new JArray();
-    //   JObject findObject = new JObject();
-    //   JArray grassArray = new JArray();
 
-    //   for(int i = 0; i < tileList.Count; i++)
-    //     {
-    //         JObject obj; //lägg in if sats där de kollar index och om index = med någonting lägg. lägg in case switch som kollar vilken typ de är sen sett in i array
-    //         switch tile
-
-    //             case(tileList[i] is grasstile):
-    //             grassArray.Add({"positionX": tileList[i].pos.X, "positionY": tileList[i].pos.Y, "height": Game1.tileSize, "width": Game1.tileSize})
-                
-    //             //case()
-
-
-            
-    //     }
-    //     findObject.Add("grassTile", grassArray) // gör såhär för alla tiles
-
-
-    //     //lägg till arraysen i findobject
-    //     //när jag läggger in behöver jag pos som kommer ifrån mus funktionen
-
-    //     //file.writealltext()
-    //     //skappa arrayer som t.ex grassarray som man fyller jobjects i
-
-    //     findObject.Add("GrassTiles", grassArray);
-    
-    //}
 
     public void SaveFile(string fileName)
     {
         JArray grassArray = new JArray();
         JArray wallArray = new JArray();
         JArray groundArray = new JArray();
+        JArray playerArray = new JArray();
 
         foreach (Tile tile in tileList)
         {
@@ -197,15 +197,31 @@ public class LevelEditor
 
         }
 
+        
+        if(player != null)
+        {
+            JObject playerObject = new JObject
+            {
+                ["positionX"] = (int)player.pos.X,
+                ["positionY"] = (int)player.pos.Y,
+                ["height"] = Game1.tileSize * 2,
+                ["width"] = Game1.tileSize * 2
+            };
+
+            playerArray.Add(playerObject);
+        }
+        
+
         JObject levelObject = new JObject
         {
-            ["GrassTiles"] = grassArray
-            ["WallTiles"] = wallArray
-            ["GroundTiles"] = groundArray
+            ["GrassTiles"] = grassArray,
+            ["WallTiles"] = wallArray,
+            ["GroundTiles"] = groundArray,
+            ["Player"] = playerArray
         };
 
         
-
+        string? directory = Path.GetDirectoryName("EditedLevel.json");
         File.WriteAllText(fileName, levelObject.ToString());
     }
 
@@ -226,18 +242,36 @@ public class LevelEditor
     {
         tileList.Clear();
 
-        List<Rectangle> rectangles = JsonParser.GetRectangleList(fileName, "GrassTiles"); //lägg in de andra tilesen
-
-        foreach (Rectangle rectangle in rectangles)
+        foreach (Rectangle rectangle in JsonParser.GetRectangleList(fileName, "GrassTiles"))
         {
             tileList.Add(new Grass(
-            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texGrass, rectangle));
+                new Vector2(rectangle.X, rectangle.Y),
+                Texturemanager.texGrass,
+                rectangle));
+        }
 
+        foreach (Rectangle rectangle in JsonParser.GetRectangleList(fileName, "WallTiles"))
+        {
             tileList.Add(new Wall(
-            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texWall, rectangle));
+                new Vector2(rectangle.X, rectangle.Y),
+                Texturemanager.texWall,
+                rectangle));
+        }
 
+        foreach (Rectangle rectangle in JsonParser.GetRectangleList(fileName, "GroundTiles"))
+        {
             tileList.Add(new Ground(
-            new Vector2(rectangle.X, rectangle.Y), Texturemanager.texGround, rectangle));
+                new Vector2(rectangle.X, rectangle.Y),
+                Texturemanager.texGround,
+                rectangle));
+        }
+
+        foreach (Rectangle rectangle in JsonParser.GetRectangleList(fileName, "Player"))
+        {
+            new Player(
+                new Vector2(rectangle.X, rectangle.Y),
+                Texturemanager.spriteSheetPlayerIdle,
+                rectangle);
         }
     }
 
@@ -247,6 +281,12 @@ public class LevelEditor
         {
             tile.Draw(spriteBatch);
         }
+
+        if(player != null)
+        {
+            player.Draw(spriteBatch); 
+        }
+       
     }
 }
   

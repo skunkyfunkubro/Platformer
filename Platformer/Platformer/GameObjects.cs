@@ -6,7 +6,7 @@ namespace Platformer;
 
 public class GameObjects
 {
-    protected Vector2 pos;
+    public Vector2 pos;
     protected Texture2D tex;
     protected Rectangle rec;
 
@@ -14,7 +14,13 @@ public class GameObjects
     {
         this.pos = pos;
         this.tex = tex;
+        this.rec = rec;
     }  
+
+    public virtual void Draw(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Draw(tex, pos, Color.White);
+    }
 
 }
 
