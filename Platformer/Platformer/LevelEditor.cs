@@ -140,6 +140,15 @@ public class LevelEditor
             RemoveTile(MousePosition(mouse));
         }
 
+        if (keyboard.IsKeyDown(Keys.Delete))
+        {
+            for(int i = 0; i < tileList.Count; i++)
+            {
+                tileList.RemoveAt(i);
+                player = null;
+            }
+        }
+
 
         previousKeyboardState = keyboard;
         previousMouseState = mouse;
